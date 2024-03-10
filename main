@@ -1,0 +1,129 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <algorithm>
+
+const int ROWS = 5;
+const int COLS = 7;
+
+void printMatrix(int arr[ROWS][COLS]) {
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < COLS; ++j) {
+            std::cout << arr[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+void randomFillMatrix(int arr[ROWS][COLS]) {
+    srand(time(0));
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < COLS; ++j) {
+            arr[i][j] = rand() % 100;  // Генеруємо випадкові числа в діапазоні [0, 99]
+        }
+    }
+}
+
+void shellSortColumn(int arr[ROWS][COLS], int col) {
+    int gap, i, j, temp;
+    int n = ROWS;
+
+    for (gap = n / 2; gap > 0; gap /= 2) {
+        for (i = gap; i < n; ++i) {
+            temp = arr[i][col];
+
+            for (j = i; j >= gap && arr[j - gap][col] > temp; j -= gap) {
+                arr[j][col] = arr[j - gap][col];
+            }
+
+            arr[j][col] = temp;
+        }
+    }
+}
+
+void heapify(int arr[ROWS][COLS], int n, int i, int col) {
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    if (left < n && arr[left][col] > arr[largest][col]) {
+        largest = left;
+    }
+
+    if (right < n && arr[right][col] > arr[largest][col]) {
+        largest = right;
+    }
+
+    if (largest != i) {
+        std::swap(arr[i][col], arr[largest][col]);
+        heapify(arr, n, largest, col);
+    }
+}
+
+void heapSortColumn(int arr[ROWS][COLS], int col) {
+    int n = ROWS;
+
+    for (int i = n / 2 - 1; i >= 0; --i) {
+        heapify(arr, n, i, col);
+    }
+
+    for (int i = n - 1; i > 0; --i) {
+        std::swap(arr[0][col], arr[i][col]);
+        heapify(arr, i, 0, col);
+    }
+}
+
+int main() {
+    int arr[ROWS][COLS];
+
+    // Випадкове наповнення матриці
+    randomFillMatrix(arr);
+
+    std::cout << "Original Matrix:" << std::endl;
+    printMatrix(arr);
+    std::cout << std::endl;
+
+    // Знаходимо стовбець з найбільшим елементом
+    int maxElement = arr[0][0];
+    int maxCol = 0;
+
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < COLS; ++j) {
+            if (arr[i][j] > maxElement) {
+                maxElement = arr[i][j];
+                maxCol = j;
+            }
+        }
+    }
+
+    // Сортуємо стовбець за допомогою Шелла
+    shellSortColumn(arr, maxCol);
+
+    std::cout << "Matrix after Shell sort on column " << maxCol << ":" << std::endl;
+    printMatrix(arr);
+    std::cout << std::endl;
+
+    // Відновлюємо оригінальну матрицю
+    randomFillMatrix(arr);
+
+    // Знову знаходимо стовбець з найбільшим елементом
+    maxElement = arr[0][0];
+    maxCol = 0;
+
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < COLS; ++j) {
+            if (arr[i][j] > maxElement) {
+                maxElement = arr[i][j];
+                maxCol = j;
+            }
+        }
+    }
+
+    // Сортуємо стовбець за допомогою пірамідального сортування
+    heapSortColumn(arr, maxCol);
+
+    std::cout << "Matrix after Heap sort on column " << maxCol << ":" << std::endl;
+    printMatrix(arr);
+
+    return 0;
+}
